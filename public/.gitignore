@@ -1,0 +1,10 @@
+# ملفات حساسة
+.env
+
+# مجلد الحزم
+node_modules/
+
+# إعدادات شخصية
+.vscode/
+.DS_Store
+Thumbs.db

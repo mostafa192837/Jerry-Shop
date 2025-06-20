@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jerry Shop</title>
+
+    <link rel="icon" href="https://i.ibb.co/fzx835Wh/Screenshot-2025-06-20-010211.png" type="image/png" />
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <!-- PayPal SDK -->
+    <script id="paypal-script"></script>
+
+    <!-- reCAPTCHA Enterprise -->
+    <script
+        src="https://www.google.com/recaptcha/enterprise.js?render=6LfUBVwrAAAAALHfp2rXtMSP4N5krZ0Qy08wlAU3"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --dark: #292F36;
+            --light: #F7FFF7;
+            --accent: #FFE66D;
+            --success: #6BCB77;
+            --warning: #FFD166;
+            --danger: #EF476F;
+            --info: #118AB2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            margin-left: 10px;
+            color: var(--accent);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-right: 20px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        nav ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-buttons button {
+            background-color: white;
+            color: var(--primary);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .auth-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 20px;
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+
+        .cta-button {
+            background-color: var(--accent);
+            color: var(--dark);
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Products Section */
+        .products-section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 36px;
+            color: var(--dark);
+            position: relative;
+            display: inline-block;
+            padding-bottom: 15px;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 50%;
+            transform: translateX(50%);
+            width: 80px;
+            height: 3px;
+            background-color: var(--primary);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .product-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .product-image {
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.1);
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-info h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .product-price {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .product-stock {
+            display: inline-block;
+            padding: 4px 10px;
+            background-color: var(--success);
+            color: white;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .view-product {
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+            background-color: var(--dark);
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .view-product:hover {
+            background-color: var(--primary);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 50px auto;
+            max-width: 800px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: modalFadeIn 0.4s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 20px;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 24px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-modal:hover {
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+            outline: none;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+        }
+
+        .btn-secondary:hover {
+            background-color: #3dbeb6;
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            display: flex;
+            min-height: calc(100vh - 80px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--dark);
+            color: white;
+            padding: 30px 0;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-right: 3px solid var(--primary);
+        }
+
+        .sidebar-menu i {
+            margin-left: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            background-color: #f5f7fa;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .card-header h3 {
+            font-size: 20px;
+            color: var(--dark);
+        }
+
+        /* Order Styles */
+        .order-item {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .order-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-left: 20px;
+        }
+
+        .order-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .order-details {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .order-details h4 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .order-meta {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .order-meta span {
+            margin-left: 15px;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .order-meta strong {
+            color: var(--dark);
+        }
+
+        .order-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .status-pending {
+            background-color: var(--warning);
+            color: var(--dark);
+        }
+
+        .status-completed {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .status-cancelled {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .order-actions {
+            margin-top: 15px;
+        }
+
+        /* Alert Styles */
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        /* Footer Styles */
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 50px 0 20px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-column h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 50px;
+            height: 2px;
+            background-color: var(--primary);
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column ul li a {
+            color: #bbb;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-column ul li a:hover {
+            color: white;
+            padding-right: 5px;
+        }
+
+        .social-links {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            margin-left: 10px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background-color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #bbb;
+            font-size: 14px;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .dashboard {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 20px 0;
+            }
+
+            .sidebar-menu {
+                display: flex;
+                overflow-x: auto;
+                padding: 0 15px;
+            }
+
+            .sidebar-menu li {
+                margin-bottom: 0;
+                margin-left: 10px;
+                white-space: nowrap;
+            }
+
+            .sidebar-menu a {
+                padding: 10px 15px;
+                border-right: none;
+                border-bottom: 3px solid transparent;
+            }
+
+            .sidebar-menu a:hover,
+            .sidebar-menu a.active {
+                border-right: none;
+                border-bottom: 3px solid var(--primary);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .logo {
+                margin-bottom: 15px;
+            }
+
+            nav ul {
+                justify-content: center;
+                margin-bottom: 15px;
+            }
+
+            .auth-buttons {
+                display: flex;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .hero p {
+                font-size: 18px;
+            }
+
+            .order-item {
+                flex-direction: column;
+            }
+
+            .order-image {
+                width: 100%;
+                height: 200px;
+                margin-left: 0;
+                margin-bottom: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                padding: 60px 0;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .section-title h2 {
+                font-size: 28px;
+            }
+        }
+
+        /* Utility Classes */
+        .text-center {
+            text-align: center;
+        }
+
+        .text-left {
+            text-align: right;
+        }
+
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        .mt-30 {
+            margin-top: 30px;
+        }
+
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+
+        .mb-30 {
+            margin-bottom: 30px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff5252;
+        }
+
+        /* Image Preview Styles */
+        #imageUrlInput {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        #imagePreview {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        #imagePreview img {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 8px;
+            border: 2px solid var(--success);
+            display: none;
+        }
+
+        #imageError {
+            color: var(--danger);
+            margin-top: 5px;
+            display: none;
+        }
+
+        .image-upload-instructions {
+            background-color: #f8f9fa;
+            border-right: 4px solid var(--info);
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .image-upload-instructions a {
+            color: var(--info);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .image-upload-instructions a:hover {
+            text-decoration: underline;
+        }
+
+        .admin-delete-btn {
+            background-color: var(--danger) !important;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header Section -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-shopping-bag"></i>
+                <span>Jerry Shop</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active" id="home-link">الرئيسية</a></li>
+                    <li><a href="#" id="products-link">المنتجات</a></li>
+                    <li><a href="#" id="dashboard-link">لوحة التحكم</a></li>
+                    <li><a href="#" id="add-product-link">بيع منتج</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <button id="login-btn">تسجيل الدخول</button>
+                <button id="logout-btn" class="hidden">تسجيل الخروج</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Sections -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero" id="hero-section">
+            <div class="container">
+                <h1>مرحبًا بكم في Jerry Shop</h1>
+                <p>أفضل سوق لشراء وبيع المنتجات مع دفعات آمنة وحماية للمشتري.</p>
+                <button class="cta-button" id="explore-btn">استكشف المنتجات</button>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section class="products-section" id="products-section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>منتجات مميزة</h2>
+                </div>
+                <div class="products-grid" id="products-container">
+                    <!-- Products will be loaded here dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Section (Hidden by default) -->
+        <section class="dashboard hidden" id="dashboard-section">
+            <div class="sidebar">
+                <ul class="sidebar-menu" id="dashboard-menu">
+                    <li><a href="#" class="active" data-section="dashboard-overview"><i
+                                class="fas fa-tachometer-alt"></i> نظرة عامة</a></li>
+                    <li><a href="#" data-section="my-products"><i class="fas fa-box-open"></i> منتجاتي</a></li>
+                    <li><a href="#" data-section="seller-orders"><i class="fas fa-clipboard-list"></i> الطلبات</a></li>
+                    <li><a href="#" data-section="add-product"><i class="fas fa-plus-circle"></i> إضافة منتج</a></li>
+                    <li><a href="#" data-section="admin-panel" class="hidden" id="admin-link"><i
+                                class="fas fa-lock"></i> لوحة الإدارة</a></li>
+                </ul>
+            </div>
+            <div class="main-content">
+                <!-- Dashboard Overview -->
+                <div class="dashboard-content" id="dashboard-overview">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>نظرة عامة على لوحة التحكم</h3>
+                        </div>
+                        <div class="card-body">
+                            <p>مرحبًا بك في لوحة تحكم Jerry Shop. هنا يمكنك إدارة منتجاتك وعرض الطلبات وتتبع مبيعاتك.
+                            </p>
+                            <div id="stats-container" class="mt-30">
+                                <!-- Stats will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Products -->
+                <div class="dashboard-content hidden" id="my-products">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>منتجاتي</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="user-products-container">
+                                <!-- User's products will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seller Orders -->
+                <div class="dashboard-content hidden" id="seller-orders">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>الطلبات الواردة</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="orders-container">
+                                <!-- Orders will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Product -->
+                <div class="dashboard-content hidden" id="add-product">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>إضافة منتج جديد</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="image-upload-instructions">
+                                <strong>كيفية رفع صورة المنتج:</strong>
+                                <ol>
+                                    <li>اذهب إلى <a href="https://postimages.org/" target="_blank">postimages.org</a>
+                                    </li>
+                                    <li>اضغط على "اختيار الصور" وحدد صورة منتجك</li>
+                                    <li>بعد الرفع، انسخ "الرابط المباشر"</li>
+                                    <li>الصق الرابط في حقل "رابط صورة المنتج" أدناه</li>
+                                </ol>
+                            </div>
+                            <form id="add-product-form">
+                                <div class="form-group">
+                                    <label for="product-name">اسم المنتج</label>
+                                    <input type="text" id="product-name" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="imageUrlInput">رابط صورة المنتج</label>
+                                    <input type="url" id="imageUrlInput" class="form-control"
+                                        placeholder="الصق رابط الصورة من postimages.org" required>
+                                    <div id="imagePreview">
+                                        <img id="previewImage" src="#" alt="معاينة الصورة">
+                                        <div id="imageError"></div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="product-price">السعر (جنيه مصري)</label>
+                                    <input type="number" id="product-price" class="form-control" min="0" step="0.01"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="product-stock">الكمية المتاحة</label>
+                                    <input type="number" id="product-stock" class="form-control" min="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="payment-method">طريقة الدفع</label>
+                                    <select id="payment-method" class="form-control" required>
+                                        <option value="">اختر طريقة الدفع</option>
+                                        <option value="vodafone">فودافون كاش</option>
+                                        <option value="paypal">باي بال</option>
+                                        <option value="visa">فيزا</option>
+                                        <option value="instapay">انستاباي</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="payment-details">تفاصيل الدفع (رقم الحساب/البريد الإلكتروني)</label>
+                                    <input type="text" id="payment-details" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="seller-phone">رقم هاتفك</label>
+                                    <input type="text" id="seller-phone" class="form-control" required>
+                                </div>
+                                <div class="alert alert-warning">
+                                    <strong>هام:</strong> هذه المنصة تعمل فقط كوسيط. سيتم تحويل المال لك فقط بعد تأكيد
+                                    المشتري استلام المنتج.
+                                </div>
+                                <button type="submit" class="btn btn-block">إضافة المنتج</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Panel -->
+                <div class="dashboard-content hidden" id="admin-panel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>لوحة الإدارة</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="admin-orders-container">
+                                <!-- Admin orders will be loaded here -->
+                            </div>
+                            <div id="admin-products-container" class="mt-30">
+                                <h3>جميع المنتجات</h3>
+                                <div id="productsContainer"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Product Modal -->
+    <div class="modal" id="product-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-product-title">تفاصيل المنتج</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="product-modal-content">
+                    <!-- Product details will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>تسجيل الدخول إلى Jerry Shop</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <button id="google-login-btn" class="btn btn-block" style="background-color: #4285F4;">
+                    <i class="fab fa-google"></i> تسجيل الدخول باستخدام Google
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>عن Jerry Shop</h3>
+                    <p>Jerry Shop هو سوق آمن لشراء وبيع المنتجات مع حماية المشتري ومعالجة دفع آمنة.</p>
+                    <div class="social-links">
+                        <a href="https://www.tiktok.com/@jerryshop.team" target="_blank"><i
+                                class="fab fa-tiktok"></i></a>
+                        <a href="https://www.instagram.com/jerryshop.team/" target="_blank"><i
+                                class="fab fa-instagram"></i></a>
+                        <a href="https://www.facebook.com/profile.php?id=61576666733610" target="_blank"><i
+                                class="fab fa-facebook-f"></i></a>
+                        <a href="mailto:jerryshop.team@gmail.com"><i class="fas fa-envelope"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>روابط سريعة</h3>
+                    <ul>
+                        <li><a href="#">الرئيسية</a></li>
+                        <li><a href="#">المنتجات</a></li>
+                        <li><a href="#">البيع على Jerry Shop</a></li>
+                        <li><a href="#">شروط الخدمة</a></li>
+                        <li><a href="#">سياسة الخصوصية</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>خدمة العملاء</h3>
+                    <ul>
+                        <li><a href="#">اتصل بنا</a></li>
+                        <li><a href="#">الأسئلة الشائعة</a></li>
+                        <li><a href="#">سياسة الشحن</a></li>
+                        <li><a href="#">الاسترجاع والاسترداد</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 Jerry Shop. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Load configuration from backend
+        fetch("/config")
+            .then(res => res.json())
+            .then(data => {
+                // Initialize Firebase with config from backend
+                firebase.initializeApp(data.firebaseConfig);
+                console.log("✅ Firebase initialized successfully");
+
+                // Load PayPal SDK with client ID from backend
+                const paypalScript = document.getElementById('paypal-script');
+                paypalScript.src = `https://www.paypal.com/sdk/js?client-id=${data.paypalClientId}&currency=EGP`;
+                console.log("✅ PayPal SDK loaded successfully");
+
+                // Initialize the rest of the application
+                initializeApp(data.adminEmail);
+            })
+            .catch(err => {
+                console.error("❌ Failed to load configuration:", err);
+                alert("حدث خطأ في تحميل إعدادات التطبيق. الرجاء المحاولة مرة أخرى لاحقًا.");
+            });
+
+        function initializeApp(adminEmail) {
+            // Initialize Firebase services
+            const db = firebase.firestore();
+            const auth = firebase.auth();
+
+            // DOM Elements
+            const homeLink = document.getElementById('home-link');
+            const productsLink = document.getElementById('products-link');
+            const dashboardLink = document.getElementById('dashboard-link');
+            const addProductLink = document.getElementById('add-product-link');
+            const loginBtn = document.getElementById('login-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const exploreBtn = document.getElementById('explore-btn');
+            const productsContainer = document.getElementById('products-container');
+            const dashboardSection = document.getElementById('dashboard-section');
+            const heroSection = document.getElementById('hero-section');
+            const productsSection = document.getElementById('products-section');
+            const dashboardMenu = document.getElementById('dashboard-menu');
+            const dashboardContents = document.querySelectorAll('.dashboard-content');
+            const productModal = document.getElementById('product-modal');
+            const loginModal = document.getElementById('login-modal');
+            const closeModalBtns = document.querySelectorAll('.close-modal');
+            const googleLoginBtn = document.getElementById('google-login-btn');
+            const addProductForm = document.getElementById('add-product-form');
+            const imageUrlInput = document.getElementById('imageUrlInput');
+            const previewImage = document.getElementById('previewImage');
+            const imageError = document.getElementById('imageError');
+            const userProductsContainer = document.getElementById('user-products-container');
+            const ordersContainer = document.getElementById('orders-container');
+            const adminOrdersContainer = document.getElementById('admin-orders-container');
+            const adminLink = document.getElementById('admin-link');
+            const statsContainer = document.getElementById('stats-container');
+            const adminProductsContainer = document.getElementById('productsContainer');
+
+            // Image URL Input Preview
+            imageUrlInput.addEventListener('input', () => {
+                const url = imageUrlInput.value.trim();
+                previewImage.style.display = 'none';
+                imageError.style.display = 'none';
+
+                if (!url || !url.startsWith("http")) {
+                    imageError.textContent = "❌ رابط غير صالح. الرجاء إدخال رابط صورة صحيح يبدأ بـ http أو https.";
+                    imageError.style.display = 'block';
+                    return;
+                }
+
+                previewImage.onload = function () {
+                    previewImage.style.display = 'block';
+                    imageError.style.display = 'none';
+                };
+
+                previewImage.onerror = function () {
+                    previewImage.style.display = 'none';
+                    imageError.textContent = "❌ تعذر تحميل الصورة. الرجاء التأكد من صحة الرابط وأنه يشير مباشرة إلى ملف صورة (ينتهي بـ .jpg, .png, إلخ)";
+                    imageError.style.display = 'block';
+                };
+
+                previewImage.src = url;
+            });
+
+            // Global Variables
+            let currentUser = null;
+            let currentProductId = null;
+
+            // Event Listeners
+            homeLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                showHomePage();
+            });
+
+            productsLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                showProductsPage();
+            });
+
+            dashboardLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentUser) {
+                    showDashboard();
+                } else {
+                    showLoginModal();
+                }
+            });
+
+            addProductLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentUser) {
+                    showDashboard('add-product');
+                } else {
+                    showLoginModal();
+                }
+            });
+
+            loginBtn.addEventListener('click', showLoginModal);
+            logoutBtn.addEventListener('click', signOut);
+            exploreBtn.addEventListener('click', showProductsPage);
+
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === productModal) {
+                    productModal.style.display = 'none';
+                }
+                if (e.target === loginModal) {
+                    loginModal.style.display = 'none';
+                }
+            });
+
+            // Close modal buttons
+            closeModalBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    productModal.style.display = 'none';
+                    loginModal.style.display = 'none';
+                });
+            });
+
+            // Google login
+            googleLoginBtn.addEventListener('click', signInWithGoogle);
+
+            // Dashboard menu items
+            dashboardMenu.querySelectorAll('a').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = e.target.getAttribute('data-section');
+                    showDashboardSection(section);
+                });
+            });
+
+            // Add product form
+            addProductForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                // Validate image URL
+                if (!previewImage.src || previewImage.style.display === 'none') {
+                    alert('الرجاء إدخال رابط صورة صحيح والتأكد من تحميل الصورة بشكل صحيح');
+                    return;
+                }
+
+                try {
+                    // Execute reCAPTCHA
+                    const token = await new Promise((resolve, reject) => {
+                        grecaptcha.enterprise.ready(() => {
+                            grecaptcha.enterprise.execute('6LfUBVwrAAAAALHfp2rXtMSP4N5krZ0Qy08wlAU3', { action: 'add_product' })
+                                .then(resolve)
+                                .catch(reject);
+                        });
+                    });
+
+                    if (!token) {
+                        alert('الرجاء إكمال التحقق من reCAPTCHA');
+                        return;
+                    }
+
+                    const product = {
+                        name: document.getElementById('product-name').value.trim(),
+                        imageUrl: document.getElementById('imageUrlInput').value.trim(),
+                        price: parseFloat(document.getElementById('product-price').value),
+                        stock: parseInt(document.getElementById('product-stock').value),
+                        paymentMethod: document.getElementById('payment-method').value,
+                        paymentDetails: document.getElementById('payment-details').value.trim(),
+                        sellerPhone: document.getElementById('seller-phone').value.trim(),
+                        sellerEmail: currentUser.email,
+                        createdAt: new Date().toISOString()
+                    };
+
+                    await db.collection('products').add(product);
+                    alert('تمت إضافة المنتج بنجاح!');
+                    addProductForm.reset();
+                    previewImage.style.display = 'none';
+                    previewImage.src = '#';
+                    imageError.style.display = 'none';
+                    loadUserProducts();
+                } catch (error) {
+                    console.error('Error adding product:', error);
+                    alert('حدث خطأ أثناء إضافة المنتج. الرجاء المحاولة مرة أخرى.');
+                }
+            });
+
+            // Auth State Listener
+            auth.onAuthStateChanged(user => {
+                currentUser = user;
+                if (user) {
+                    // User is signed in
+                    loginBtn.classList.add('hidden');
+                    logoutBtn.classList.remove('hidden');
+
+                    // Check if user is admin
+                    if (user.email === adminEmail) {
+                        adminLink.classList.remove('hidden');
+                        loadAdminProducts(); // Load all products for admin
+                    } else {
+                        adminLink.classList.add('hidden');
+                    }
+
+                    // Load dashboard data if on dashboard
+                    if (dashboardSection.classList.contains('hidden') === false) {
+                        loadDashboardData();
+                    }
+                } else {
+                    // User is signed out
+                    loginBtn.classList.remove('hidden');
+                    logoutBtn.classList.add('hidden');
+
+                    // If on dashboard, redirect to home
+                    if (dashboardSection.classList.contains('hidden') === false) {
+                        showHomePage();
+                    }
+                }
+            });
+
+            // Functions
+            function showHomePage() {
+                heroSection.style.display = 'block';
+                productsSection.style.display = 'block';
+                dashboardSection.classList.add('hidden');
+                loadProducts();
+            }
+
+            function showProductsPage() {
+                heroSection.style.display = 'none';
+                productsSection.style.display = 'block';
+                dashboardSection.classList.add('hidden');
+                loadProducts();
+            }
+
+            function showDashboard(section = 'dashboard-overview') {
+                heroSection.style.display = 'none';
+                productsSection.style.display = 'none';
+                dashboardSection.classList.remove('hidden');
+                showDashboardSection(section);
+                loadDashboardData();
+            }
+
+            function showDashboardSection(section) {
+                // Hide all sections first
+                dashboardContents.forEach(content => {
+                    content.classList.add('hidden');
+                });
+
+                // Show only sections that the user has access to
+                if (currentUser && currentUser.email === adminEmail) {
+                    // Admin can see all sections
+                    document.getElementById(section).classList.remove('hidden');
+                } else {
+                    // Regular users can't see admin panel or overview
+                    if (section === 'admin-panel' || section === 'dashboard-overview') {
+                        section = 'my-products'; // Redirect to my-products if trying to access restricted section
+                    }
+                    document.getElementById(section).classList.remove('hidden');
+                }
+
+                // Update active menu item
+                dashboardMenu.querySelectorAll('a').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.getAttribute('data-section') === section) {
+                        item.classList.add('active');
+                    }
+                });
+
+                // Load specific data if needed
+                if (section === 'my-products') {
+                    loadUserProducts();
+                } else if (section === 'seller-orders') {
+                    loadSellerOrders();
+                } else if (section === 'admin-panel') {
+                    loadAdminOrders();
+                    loadAdminProducts();
+                } else if (section === 'dashboard-overview') {
+                    loadDashboardStats();
+                }
+            }
+
+            function showLoginModal() {
+                loginModal.style.display = 'block';
+            }
+
+            function signInWithGoogle() {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                auth.signInWithPopup(provider)
+                    .then(() => {
+                        loginModal.style.display = 'none';
+                        showDashboard();
+                    })
+                    .catch(error => {
+                        console.error('Google Sign-In Error:', error);
+                        alert('حدث خطأ أثناء تسجيل الدخول باستخدام Google. الرجاء المحاولة مرة أخرى.');
+                    });
+            }
+
+            function signOut() {
+                auth.signOut()
+                    .then(() => {
+                        showHomePage();
+                    })
+                    .catch(error => {
+                        console.error('Sign Out Error:', error);
+                    });
+            }
+
+            function loadProducts() {
+                productsContainer.innerHTML = '<p>جاري تحميل المنتجات...</p>';
+
+                db.collection('products').get()
+                    .then(snapshot => {
+                        if (snapshot.empty) {
+                            productsContainer.innerHTML = '<p>لا توجد منتجات متاحة.</p>';
+                            return;
+                        }
+
+                        productsContainer.innerHTML = '';
+                        snapshot.forEach(doc => {
+                            const product = doc.data();
+                            const productCard = createProductCard(product, doc.id);
+                            productsContainer.appendChild(productCard);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading products:', error);
+                        productsContainer.innerHTML = '<p>حدث خطأ أثناء تحميل المنتجات. الرجاء المحاولة مرة أخرى.</p>';
+                    });
+            }
+
+            function createProductCard(product, productId) {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+
+                card.innerHTML = `
+                    <div class="product-image">
+                        <img src="${product.imageUrl}" alt="${product.name}">
+                    </div>
+                    <div class="product-info">
+                        <h3>${product.name}</h3>
+                        <div class="product-price">${product.price} جنيه</div>
+                        <div class="product-stock">${product.stock} متاح</div>
+                        <a href="#" class="view-product" data-id="${productId}">عرض المنتج</a>
+                    </div>
+                `;
+
+                card.querySelector('.view-product').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showProductModal(productId);
+                });
+
+                return card;
+            }
+
+            function loadAdminProducts() {
+                if (!currentUser || currentUser.email !== adminEmail) return;
+
+                adminProductsContainer.innerHTML = '<p>جاري تحميل جميع المنتجات...</p>';
+
+                db.collection('products').get()
+                    .then(snapshot => {
+                        if (snapshot.empty) {
+                            adminProductsContainer.innerHTML = '<p>لا توجد منتجات متاحة.</p>';
+                            return;
+                        }
+
+                        adminProductsContainer.innerHTML = '';
+                        snapshot.forEach(doc => {
+                            const product = doc.data();
+                            const productElement = createAdminProductElement(product, doc.id);
+                            adminProductsContainer.appendChild(productElement);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading admin products:', error);
+                        adminProductsContainer.innerHTML = '<p>حدث خطأ أثناء تحميل المنتجات. الرجاء المحاولة مرة أخرى.</p>';
+                    });
+            }
+
+            function createAdminProductElement(product, productId) {
+                const element = document.createElement('div');
+                element.style.border = '1px solid #ccc';
+                element.style.margin = '10px';
+                element.style.padding = '10px';
+                element.style.borderRadius = '8px';
+
+                element.innerHTML = `
+                    <h3>${product.name}</h3>
+                    <img src="${product.imageUrl}" width="150"><br>
+                    <p>السعر: ${product.price} جنيه</p>
+                    <p>الكمية: ${product.stock}</p>
+                    <p>هاتف البائع: ${product.sellerPhone}</p>
+                    <p>بريد البائع: ${product.sellerEmail}</p>
+                    <p>طريقة الدفع: ${product.paymentMethod} - ${product.paymentDetails}</p>
+                    <button class="btn admin-delete-btn" onclick="deleteProduct('${productId}')">
+                        <i class="fas fa-trash"></i> حذف المنتج
+                    </button>
+                `;
+
+                return element;
+            }
+
+            function showProductModal(productId) {
+                currentProductId = productId;
+
+                db.collection('products').doc(productId).get()
+                    .then(doc => {
+                        if (!doc.exists) {
+                            alert('المنتج غير موجود');
+                            return;
+                        }
+
+                        const product = doc.data();
+                        document.getElementById('modal-product-title').textContent = product.name;
+
+                        let paymentMethodText = '';
+                        switch (product.paymentMethod) {
+                            case 'vodafone': paymentMethodText = 'فودافون كاش'; break;
+                            case 'paypal': paymentMethodText = 'باي بال'; break;
+                            case 'visa': paymentMethodText = 'فيزا'; break;
+                            case 'instapay': paymentMethodText = 'انستاباي'; break;
+                            default: paymentMethodText = product.paymentMethod;
+                        }
+
+                        // Show limited info for customers, full info for admin
+                        let productDetails = '';
+                        if (currentUser && currentUser.email === adminEmail) {
+                            productDetails = `
+                                <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                                    <div style="flex: 1; min-width: 300px;">
+                                        <img src="${product.imageUrl}" alt="${product.name}" style="width: 100%; border-radius: 8px;">
+                                    </div>
+                                    <div style="flex: 1; min-width: 300px;">
+                                        <h3 style="margin-bottom: 15px;">${product.name}</h3>
+                                        <p style="font-size: 24px; color: var(--primary); font-weight: 700; margin-bottom: 15px;">${product.price} جنيه</p>
+                                        <p style="margin-bottom: 10px;"><strong>الكمية:</strong> ${product.stock}</p>
+                                        <p style="margin-bottom: 10px;"><strong>هاتف البائع:</strong> ${product.sellerPhone}</p>
+                                        <p style="margin-bottom: 10px;"><strong>بريد البائع:</strong> ${product.sellerEmail}</p>
+                                        <p style="margin-bottom: 20px;"><strong>طريقة الدفع:</strong> ${paymentMethodText} (${product.paymentDetails})</p>
+                                        
+                                        <div class="order-actions">
+                                            <button class="btn admin-delete-btn" onclick="deleteProduct('${productId}')">
+                                                <i class="fas fa-trash"></i> حذف المنتج
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            productDetails = `
+                                <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                                    <div style="flex: 1; min-width: 300px;">
+                                        <img src="${product.imageUrl}" alt="${product.name}" style="width: 100%; border-radius: 8px;">
+                                    </div>
+                                    <div style="flex: 1; min-width: 300px;">
+                                        <h3 style="margin-bottom: 15px;">${product.name}</h3>
+                                        <p style="font-size: 24px; color: var(--primary); font-weight: 700; margin-bottom: 15px;">${product.price} جنيه</p>
+                                        <p style="margin-bottom: 10px;"><strong>الكمية:</strong> ${product.stock}</p>
+                                        
+                                        <form id="order-form" style="margin-top: 30px;">
+                                            <div class="form-group">
+                                                <label for="order-quantity">الكمية</label>
+                                                <input type="number" id="order-quantity" class="form-control" min="1" max="${product.stock}" value="1" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="customer-name">اسمك</label>
+                                                <input type="text" id="customer-name" class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="customer-phone">هاتفك</label>
+                                                <input type="text" id="customer-phone" class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="customer-address">عنوان الشحن</label>
+                                                <input type="text" id="customer-address" class="form-control" required>
+                                            </div>
+                                            
+                                            <div id="paypal-button-container" style="margin-top: 20px;"></div>
+                                            
+                                            <div class="alert alert-warning" style="margin-top: 20px;">
+                                                <strong>ملاحظة:</strong> سيتم الاحتفاظ بالدفع حتى تؤكد استلام المنتج.
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            `;
+                        }
+
+                        document.getElementById('product-modal-content').innerHTML = productDetails;
+
+                        // Initialize PayPal button for customers
+                        if (!currentUser || currentUser.email !== adminEmail) {
+                            paypal.Buttons({
+                                createOrder: function (data, actions) {
+                                    const quantity = parseInt(document.getElementById('order-quantity').value);
+                                    const total = product.price * quantity;
+
+                                    if (quantity > product.stock) {
+                                        alert('الكمية المطلوبة تتجاوز الكمية المتاحة');
+                                        return;
+                                    }
+
+                                    return actions.order.create({
+                                        purchase_units: [{
+                                            amount: {
+                                                value: total.toFixed(2),
+                                                currency_code: 'EGP'
+                                            },
+                                            description: product.name
+                                        }]
+                                    });
+                                },
+                                onApprove: function (data, actions) {
+                                    return actions.order.capture().then(async function (details) {
+                                        const quantity = parseInt(document.getElementById('order-quantity').value);
+                                        const customerName = document.getElementById('customer-name').value.trim();
+                                        const customerPhone = document.getElementById('customer-phone').value.trim();
+                                        const customerAddress = document.getElementById('customer-address').value.trim();
+
+                                        const order = {
+                                            productId: productId,
+                                            productName: product.name,
+                                            productImage: product.imageUrl,
+                                            quantity: quantity,
+                                            totalPrice: product.price * quantity,
+                                            sellerEmail: product.sellerEmail,
+                                            sellerPhone: product.sellerPhone,
+                                            buyerName: customerName,
+                                            buyerPhone: customerPhone,
+                                            buyerAddress: customerAddress,
+                                            buyerEmail: details.payer.email_address,
+                                            paymentMethod: 'PayPal',
+                                            createdAt: new Date().toISOString(),
+                                            delivered: false,
+                                            paid: false,
+                                            customerConfirmed: false,
+                                            unread: true
+                                        };
+
+                                        try {
+                                            // Create order for seller
+                                            await db.collection('orders').add({
+                                                ...order,
+                                                receiver: product.sellerEmail
+                                            });
+
+                                            // Create order for admin
+                                            await db.collection('orders').add({
+                                                ...order,
+                                                receiver: adminEmail
+                                            });
+
+                                            // Update product stock
+                                            const remainingStock = product.stock - quantity;
+                                            if (remainingStock <= 0) {
+                                                // Delete product if stock is 0
+                                                await db.collection('products').doc(productId).delete();
+                                                alert('تم تقديم الطلب بنجاح! هذا المنتج لم يعد متاحًا وتم حذفه.');
+                                            } else {
+                                                // Update stock
+                                                await db.collection('products').doc(productId).update({ stock: remainingStock });
+                                                alert('تم تقديم الطلب بنجاح! تم تحديث الكمية المتاحة.');
+                                            }
+
+                                            // Close modal
+                                            productModal.style.display = 'none';
+
+                                            // Reload products
+                                            loadProducts();
+
+                                            // If on dashboard, reload data
+                                            if (!dashboardSection.classList.contains('hidden')) {
+                                                loadDashboardData();
+                                            }
+                                        } catch (error) {
+                                            console.error('Error saving order:', error);
+                                            alert('حدث خطأ أثناء حفظ الطلب. الرجاء التواصل مع الدعم.');
+                                        }
+                                    });
+                                }
+                            }).render('#paypal-button-container');
+                        }
+
+                        productModal.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Error loading product:', error);
+                        alert('حدث خطأ أثناء تحميل تفاصيل المنتج. الرجاء المحاولة مرة أخرى.');
+                    });
+            }
+
+            function loadDashboardData() {
+                if (currentUser && currentUser.email === adminEmail) {
+                    loadDashboardStats();
+                }
+                loadUserProducts();
+                loadSellerOrders();
+
+                if (currentUser && currentUser.email === adminEmail) {
+                    loadAdminOrders();
+                    loadAdminProducts();
+                }
+            }
+
+            function loadDashboardStats() {
+                if (!currentUser || currentUser.email !== adminEmail) return;
+
+                statsContainer.innerHTML = '<p>جاري تحميل الإحصائيات...</p>';
+
+                // Count all products
+                db.collection('products').get()
+                    .then(snapshot => {
+                        const productCount = snapshot.size;
+
+                        // Count all orders
+                        db.collection('orders').get()
+                            .then(ordersSnapshot => {
+                                const orderCount = ordersSnapshot.size;
+
+                                // Calculate total sales
+                                let totalSales = 0;
+                                ordersSnapshot.forEach(doc => {
+                                    totalSales += doc.data().totalPrice;
+                                });
+
+                                statsContainer.innerHTML = `
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                                        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center;">
+                                            <h3 style="color: var(--primary); margin-bottom: 10px;">${productCount}</h3>
+                                            <p>إجمالي المنتجات</p>
+                                        </div>
+                                        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center;">
+                                            <h3 style="color: var(--primary); margin-bottom: 10px;">${orderCount}</h3>
+                                            <p>إجمالي الطلبات</p>
+                                        </div>
+                                        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center;">
+                                            <h3 style="color: var(--primary); margin-bottom: 10px;">${totalSales.toFixed(2)} جنيه</h3>
+                                            <p>إجمالي المبيعات</p>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                    })
+                    .catch(error => {
+                        console.error('Error loading stats:', error);
+                        statsContainer.innerHTML = '<p>حدث خطأ أثناء تحميل إحصائيات لوحة التحكم.</p>';
+                    });
+            }
+
+            function loadUserProducts() {
+                if (!currentUser) return;
+
+                userProductsContainer.innerHTML = '<p>جاري تحميل منتجاتك...</p>';
+
+                db.collection('products')
+                    .where('sellerEmail', '==', currentUser.email)
+                    .get()
+                    .then(snapshot => {
+                        if (snapshot.empty) {
+                            userProductsContainer.innerHTML = '<p>ليس لديك أي منتجات مدرجة بعد.</p>';
+                            return;
+                        }
+
+                        userProductsContainer.innerHTML = '';
+                        snapshot.forEach(doc => {
+                            const product = doc.data();
+                            const productElement = createUserProductElement(product, doc.id);
+                            userProductsContainer.appendChild(productElement);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading user products:', error);
+                        userProductsContainer.innerHTML = '<p>حدث خطأ أثناء تحميل منتجاتك. الرجاء المحاولة مرة أخرى.</p>';
+                    });
+            }
+
+            function createUserProductElement(product, productId) {
+                const element = document.createElement('div');
+                element.className = 'order-item';
+
+                element.innerHTML = `
+                    <div class="order-image">
+                        <img src="${product.imageUrl}" alt="${product.name}">
+                    </div>
+                    <div class="order-details">
+                        <h4>${product.name}</h4>
+                        <div class="order-meta">
+                            <span><strong>السعر:</strong> ${product.price} جنيه</span>
+                            <span><strong>الكمية:</strong> ${product.stock}</span>
+                            <span><strong>الدفع:</strong> ${product.paymentMethod}</span>
+                        </div>
+                        <div class="order-actions">
+                            <button class="btn" onclick="editProduct('${productId}')">تعديل</button>
+                            <button class="btn btn-secondary" onclick="deleteProduct('${productId}')">حذف</button>
+                        </div>
+                    </div>
+                `;
+
+                return element;
+            }
+
+            function editProduct(productId) {
+                db.collection('products').doc(productId).get()
+                    .then(doc => {
+                        if (!doc.exists) {
+                            alert('المنتج غير موجود');
+                            return;
+                        }
+
+                        const product = doc.data();
+
+                        // Fill the add product form with existing data
+                        document.getElementById('product-name').value = product.name;
+                        document.getElementById('imageUrlInput').value = product.imageUrl;
+                        document.getElementById('product-price').value = product.price;
+                        document.getElementById('product-stock').value = product.stock;
+                        document.getElementById('payment-method').value = product.paymentMethod;
+                        document.getElementById('payment-details').value = product.paymentDetails;
+                        document.getElementById('seller-phone').value = product.sellerPhone;
+
+                        // Show image preview
+                        previewImage.src = product.imageUrl;
+                        previewImage.style.display = 'block';
+                        imageError.style.display = 'none';
+
+                        // Scroll to form
+                        showDashboard('add-product');
+                        window.scrollTo(0, 0);
+
+                        // Change form to update mode
+                        addProductForm.removeEventListener('submit', addProductForm.submit);
+                        addProductForm.onsubmit = async function (e) {
+                            e.preventDefault();
+
+                            try {
+                                const updatedProduct = {
+                                    name: document.getElementById('product-name').value.trim(),
+                                    imageUrl: document.getElementById('imageUrlInput').value.trim(),
+                                    price: parseFloat(document.getElementById('product-price').value),
+                                    stock: parseInt(document.getElementById('product-stock').value),
+                                    paymentMethod: document.getElementById('payment-method').value,
+                                    paymentDetails: document.getElementById('payment-details').value.trim(),
+                                    sellerPhone: document.getElementById('seller-phone').value.trim()
+                                };
+
+                                await db.collection('products').doc(productId).update(updatedProduct);
+                                alert('تم تحديث المنتج بنجاح!');
+                                loadUserProducts();
+                                showDashboard('my-products');
+                            } catch (error) {
+                                console.error('Error updating product:', error);
+                                alert('حدث خطأ أثناء تحديث المنتج. الرجاء المحاولة مرة أخرى.');
+                            }
+                        };
+                    })
+                    .catch(error => {
+                        console.error('Error loading product:', error);
+                        alert('حدث خطأ أثناء تحميل تفاصيل المنتج. الرجاء المحاولة مرة أخرى.');
+                    });
+            }
+
+            function deleteProduct(productId) {
+                if (!confirm('هل أنت متأكد أنك تريد حذف هذا المنتج؟')) return;
+
+                db.collection('products').doc(productId).delete()
+                    .then(() => {
+                        alert('تم حذف المنتج بنجاح');
+                        if (currentUser && currentUser.email === adminEmail) {
+                            loadAdminProducts();
+                        } else {
+                            loadUserProducts();
+                        }
+                        loadProducts();
+                    })
+                    .catch(error => {
+                        console.error('Error deleting product:', error);
+                        alert('حدث خطأ أثناء حذف المنتج. الرجاء المحاولة مرة أخرى.');
+                    });
+            }
+
+            function loadSellerOrders() {
+                if (!currentUser) return;
+
+                ordersContainer.innerHTML = '<p>جاري تحميل طلباتك...</p>';
+
+                db.collection('orders')
+                    .where('receiver', '==', currentUser.email)
+                    .where('customerConfirmed', '==', true)
+                    .orderBy('createdAt', 'desc')
+                    .get()
+                    .then(snapshot => {
+                        if (snapshot.empty) {
+                            ordersContainer.innerHTML = '<p>ليس لديك أي طلبات مؤكدة بعد.</p>';
+                            return;
+                        }
+
+                        ordersContainer.innerHTML = '';
+                        snapshot.forEach(doc => {
+                            const order = doc.data();
+                            const orderElement = createOrderElement(order, doc.id);
+                            ordersContainer.appendChild(orderElement);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading orders:', error);
+                        ordersContainer.innerHTML = '<p>حدث خطأ أثناء تحميل طلباتك. الرجاء المحاولة مرة أخرى.</p>';
+                    });
+            }
+
+            function loadAdminOrders() {
+                if (!currentUser || currentUser.email !== adminEmail) return;
+
+                adminOrdersContainer.innerHTML = '<p>جاري تحميل طلبات الإدارة...</p>';
+
+                db.collection('orders')
+                    .where('receiver', '==', adminEmail)
+                    .where('customerConfirmed', '==', true)
+                    .where('paid', '==', false)
+                    .orderBy('createdAt', 'desc')
+                    .get()
+                    .then(snapshot => {
+                        if (snapshot.empty) {
+                            adminOrdersContainer.innerHTML = '<p>لا توجد طلبات بانتظار الدفع.</p>';
+                            return;
+                        }
+
+                        adminOrdersContainer.innerHTML = '';
+                        snapshot.forEach(doc => {
+                            const order = doc.data();
+                            const orderElement = createAdminOrderElement(order, doc.id);
+                            adminOrdersContainer.appendChild(orderElement);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading admin orders:', error);
+                        adminOrdersContainer.innerHTML = '<p>حدث خطأ أثناء تحميل طلبات الإدارة. الرجاء المحاولة مرة أخرى.</p>';
+                    });
+            }
+
+            function createOrderElement(order, orderId) {
+                const element = document.createElement('div');
+                element.className = 'order-item';
+
+                const date = new Date(order.createdAt).toLocaleString();
+                const statusClass = order.paid ? 'status-completed' : 'status-pending';
+                const statusText = order.paid ? 'تم الدفع' : 'بانتظار الدفع';
+
+                element.innerHTML = `
+                    <div class="order-image">
+                        <img src="${order.productImage}" alt="${order.productName}">
+                    </div>
+                    <div class="order-details">
+                        <h4>${order.productName}</h4>
+                        <div class="order-meta">
+                            <span><strong>الكمية:</strong> ${order.quantity}</span>
+                            <span><strong>الإجمالي:</strong> ${order.totalPrice} جنيه</span>
+                            <span><strong>التاريخ:</strong> ${date}</span>
+                        </div>
+                        <div class="order-meta">
+                            <span><strong>العميل:</strong> ${order.buyerName}</span>
+                            <span><strong>الهاتف:</strong> ${order.buyerPhone}</span>
+                            <span><strong>العنوان:</strong> ${order.buyerAddress}</span>
+                        </div>
+                        <div class="order-status ${statusClass}">${statusText}</div>
+                        ${order.paid ? '' : `
+                            <div class="order-actions">
+                                <button class="btn" onclick="markOrderAsPaid('${orderId}')">تم الدفع</button>
+                            </div>
+                        `}
+                    </div>
+                `;
+
+                return element;
+            }
+
+            function createAdminOrderElement(order, orderId) {
+                const element = document.createElement('div');
+                element.className = 'order-item';
+
+                const date = new Date(order.createdAt).toLocaleString();
+
+                element.innerHTML = `
+                    <div class="order-image">
+                        <img src="${order.productImage}" alt="${order.productName}">
+                    </div>
+                    <div class="order-details">
+                        <h4>${order.productName}</h4>
+                        <div class="order-meta">
+                            <span><strong>الكمية:</strong> ${order.quantity}</span>
+                            <span><strong>الإجمالي:</strong> ${order.totalPrice} جنيه</span>
+                            <span><strong>التاريخ:</strong> ${date}</span>
+                        </div>
+                        <div class="order-meta">
+                            <span><strong>العميل:</strong> ${order.buyerName}</span>
+                            <span><strong>الهاتف:</strong> ${order.buyerPhone}</span>
+                            <span><strong>البريد:</strong> ${order.buyerEmail}</span>
+                        </div>
+                        <div class="order-meta">
+                            <span><strong>البائع:</strong> ${order.sellerEmail}</span>
+                            <span><strong>هاتف البائع:</strong> ${order.sellerPhone}</span>
+                            <span><strong>طريقة الدفع:</strong> ${order.paymentMethod}</span>
+                        </div>
+                        <div class="order-actions">
+                            <button class="btn" onclick="markAdminOrderAsPaid('${orderId}')">تأكيد إرسال الدفع</button>
+                        </div>
+                    </div>
+                `;
+
+                return element;
+            }
+
+            function markOrderAsPaid(orderId) {
+                if (!confirm('هل استلمت الدفع من الإدارة وقمت بتسليم المنتج للعميل؟')) return;
+
+                db.collection('orders').doc(orderId).update({ paid: true })
+                    .then(() => {
+                        alert('تم وضع علامة على الطلب كمدفوع بنجاح');
+                        loadSellerOrders();
+                    })
+                    .catch(error => {
+                        console.error('Error updating order:', error);
+                        alert('حدث خطأ أثناء تحديث حالة الطلب. الرجاء المحاولة مرة أخرى.');
+                    });
+            }
+
+            function markAdminOrderAsPaid(orderId) {
+                if (!confirm('هل قمت بإرسال الدفع للبائع؟')) return;
+
+                // Update both the admin's copy and the seller's copy of the order
+                const batch = db.batch();
+
+                // Update admin's order
+                const adminOrderRef = db.collection('orders').doc(orderId);
+                batch.update(adminOrderRef, { paid: true });
+
+                // Find and update seller's order
+                db.collection('orders')
+                    .where('productId', '==', currentProductId)
+                    .where('receiver', '==', currentUser.email)
+                    .get()
+                    .then(snapshot => {
+                        if (!snapshot.empty) {
+                            const sellerOrderRef = db.collection('orders').doc(snapshot.docs[0].id);
+                            batch.update(sellerOrderRef, { paid: true });
+                        }
+
+                        return batch.commit();
+                    })
+                    .then(() => {
+                        alert('تم تحديث حالة الدفع بنجاح');
+                        loadAdminOrders();
+                    })
+                    .catch(error => {
+                        console.error('Error updating orders:', error);
+                        alert('حدث خطأ أثناء تحديث حالة الدفع. الرجاء المحاولة مرة أخرى.');
+                    });
+            }
+
+            // Make functions available globally for HTML onclick attributes
+            window.editProduct = editProduct;
+            window.deleteProduct = deleteProduct;
+            window.markOrderAsPaid = markOrderAsPaid;
+            window.markAdminOrderAsPaid = markAdminOrderAsPaid;
+
+            // Initialize the page
+            showHomePage();
+            loadProducts();
+        }
+    </script>
+</body>
+
+</html>
